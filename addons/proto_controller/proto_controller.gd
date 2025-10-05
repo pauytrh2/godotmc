@@ -120,6 +120,10 @@ func _physics_process(delta: float) -> void:
         if ray_cast_3d.is_colliding() and ray_cast_3d.get_collider().has_method("destroy_block"):
                 ray_cast_3d.get_collider().destroy_block(ray_cast_3d.get_collision_point() - ray_cast_3d.get_collision_normal())
 
+    if Input.is_action_just_pressed("RMB"):
+        if ray_cast_3d.is_colliding() and ray_cast_3d.get_collider().has_method("add_block"):
+                ray_cast_3d.get_collider().add_block(ray_cast_3d.get_collision_point() + ray_cast_3d.get_collision_normal())
+
     # Use velocity to actually move
     move_and_slide()
 
