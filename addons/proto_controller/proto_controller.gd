@@ -54,7 +54,7 @@ var freeflying : bool = false
 @onready var collider: CollisionShape3D = $Collider
 @onready var ray_cast_3d: RayCast3D = $Head/Camera3D/RayCast3D
 
-const dirt_block: int = 1
+const DIRT_BLOCK: int = 1
 
 func _ready() -> void:
     check_input_mappings()
@@ -124,7 +124,7 @@ func _physics_process(delta: float) -> void:
 
     if Input.is_action_just_pressed("RMB"):
         if ray_cast_3d.is_colliding() and ray_cast_3d.get_collider().has_method("place_block"):
-                ray_cast_3d.get_collider().place_block(ray_cast_3d.get_collision_point() + ray_cast_3d.get_collision_normal(), dirt_block)
+                ray_cast_3d.get_collider().place_block(ray_cast_3d.get_collision_point() + ray_cast_3d.get_collision_normal(), DIRT_BLOCK)
 
     # Use velocity to actually move
     move_and_slide()
