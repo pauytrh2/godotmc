@@ -4,12 +4,16 @@ const AIR_BLOCK: int = -1
 const DIRT_BLOCK: int = 1
 const CHUNK_SIZE: int = 16
 const TERRAIN_HEIGHT: int = 0
-const VIEW_DISTANCE: int = 4
+const VIEW_DISTANCE: int = 16
+const CHUNKS_PER_FRAME: int = 8
 
 @onready var player: CharacterBody3D = $"../Player"
 @onready var grid_map: GridMap = $"../GridMap"
 
-var loaded_chunks: Array = []
+var loaded_chunks: Array[Vector2i] = []
+var last_player_chunk := Vector2i(-9999, -9999)
+var chunks_to_generate: Array[Vector2i] = []
+var chunks_to_unload: Array[Vector2i] = []
 
 func get_block(_x: int, _y: int, _z: int) -> int:
     return DIRT_BLOCK if _y == TERRAIN_HEIGHT else AIR_BLOCK
@@ -25,30 +29,51 @@ func unload_chunk(chunk_x: int, chunk_z: int) -> void:
         for z in range(CHUNK_SIZE):
             grid_map.destroy_block(Vector3(chunk_x * CHUNK_SIZE + x, TERRAIN_HEIGHT, chunk_z * CHUNK_SIZE + z))
 
-func is_within_loaded_area(chunk_x: int, chunk_z: int) -> bool:
-    var player_chunk_x: int = int(player.position.x / CHUNK_SIZE)
-    var player_chunk_z: int = int(player.position.z / CHUNK_SIZE)
-    return chunk_x >= (player_chunk_x - VIEW_DISTANCE) and chunk_x <= (player_chunk_x + VIEW_DISTANCE) and chunk_z >= (player_chunk_z - VIEW_DISTANCE) and chunk_z <= (player_chunk_z + VIEW_DISTANCE)
+func update_loaded_chunks(center_chunk: Vector2i) -> void:
+    var start_x = center_chunk.x - VIEW_DISTANCE
+    var end_x = center_chunk.x + VIEW_DISTANCE
+    var start_z = center_chunk.y - VIEW_DISTANCE
+    var end_z = center_chunk.y + VIEW_DISTANCE
+
+    var desired_chunks: Array[Vector2i] = []
+    for x in range(start_x, end_x + 1):
+        for z in range(start_z, end_z + 1):
+            desired_chunks.append(Vector2i(x, z))
+
+    desired_chunks.sort_custom(func(a, b):
+        var da = center_chunk.distance_to(a)
+        var db = center_chunk.distance_to(b)
+        return da < db
+    )
+
+    for pos in desired_chunks:
+        if not loaded_chunks.has(pos) and not chunks_to_generate.has(pos):
+            chunks_to_generate.append(pos)
+            loaded_chunks.append(pos)
+
+    for chunk in loaded_chunks.duplicate():
+        if not desired_chunks.has(chunk) and not chunks_to_unload.has(chunk):
+            chunks_to_unload.append(chunk)
 
 func _process(_delta: float) -> void:
-    var player_chunk_x: int = int(player.position.x / CHUNK_SIZE)
-    var player_chunk_z: int = int(player.position.z / CHUNK_SIZE)
+    var current_chunk := Vector2i(
+        int(player.position.x / CHUNK_SIZE),
+        int(player.position.z / CHUNK_SIZE)
+    )
 
-    var start_loaded_area: Vector3 = Vector3(player_chunk_x - VIEW_DISTANCE, 0, player_chunk_z - VIEW_DISTANCE)
-    var end_loaded_area: Vector3 = Vector3(player_chunk_x + VIEW_DISTANCE, 0, player_chunk_z + VIEW_DISTANCE)
+    if current_chunk != last_player_chunk:
+        last_player_chunk = current_chunk
+        update_loaded_chunks(current_chunk)
 
-    for chunk_x in range(start_loaded_area.x, end_loaded_area.x + 1):
-        for chunk_z in range(start_loaded_area.z, end_loaded_area.z + 1):
-            if not is_within_loaded_area(chunk_x, chunk_z):
-                continue
-            if not loaded_chunks.has([chunk_x, chunk_z]):
-                generate_chunk(chunk_x, chunk_z)
-                loaded_chunks.append([chunk_x, chunk_z])
+    for i in range(CHUNKS_PER_FRAME):
+        if chunks_to_generate.size() == 0:
+            break
+        var pos = chunks_to_generate.pop_front()
+        generate_chunk(pos.x, pos.y)
 
-    for chunk in loaded_chunks:
-        var chunk_x: int = chunk[0]
-        var chunk_z: int = chunk[1]
-
-        if chunk_x < start_loaded_area.x or chunk_x > end_loaded_area.x or chunk_z < start_loaded_area.z or chunk_z > end_loaded_area.z:
-            unload_chunk(chunk_x, chunk_z)
-            loaded_chunks.erase(chunk)
+    for i in range(CHUNKS_PER_FRAME):
+        if chunks_to_unload.size() == 0:
+            break
+        var pos = chunks_to_unload.pop_front()
+        unload_chunk(pos.x, pos.y)
+        loaded_chunks.erase(pos)
