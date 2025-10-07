@@ -1,6 +1,6 @@
 [gd_scene load_steps=9 format=3 uid="uid://dfrbubgqw87p1"]
 
-[ext_resource type="PackedScene" uid="uid://bs72ogkvdd7d6" path="res://addons/proto_controller/proto_controller.tscn" id="1_o5qli"]
+[ext_resource type="PackedScene" uid="uid://bs72ogkvdd7d6" path="res://addons/proto_controller/player.tscn" id="1_o5qli"]
 [ext_resource type="MeshLibrary" uid="uid://cj0hvt78ewr7v" path="res://assets/scenes.tres" id="2_0wfyh"]
 [ext_resource type="Script" uid="uid://bnnuhpfm4bfit" path="res://scripts/grid_map.gd" id="3_sugp2"]
 
