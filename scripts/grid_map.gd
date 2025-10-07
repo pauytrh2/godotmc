@@ -13,7 +13,3 @@ func place_block(world_cord: Vector3, block_index: int):
     if local_to_map(player.position) == map_cord:
         return
     set_cell_item(map_cord, block_index)
-
-func replace_block(world_cord: Vector3, block_index: int):
-    destroy_block(world_cord)
-    place_block(world_cord, block_index)
