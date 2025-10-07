@@ -15,8 +15,8 @@ var last_player_chunk := Vector2i(-9999, -9999)
 var chunks_to_generate: Array[Vector2i] = []
 var chunks_to_unload: Array[Vector2i] = []
 
-func get_block(_x: int, _y: int, _z: int) -> int:
-    return DIRT_BLOCK if _y == TERRAIN_HEIGHT else AIR_BLOCK
+func get_block(_x: int, y: int, _z: int) -> int:
+    return DIRT_BLOCK if y == TERRAIN_HEIGHT else AIR_BLOCK
 
 func generate_chunk(chunk_x: int, chunk_z: int) -> void:
     for x in range(CHUNK_SIZE):
