@@ -2,6 +2,8 @@ extends Node
 
 const AIR_BLOCK: int = -1
 const DIRT_BLOCK: int = 1
+const GRASS_BLOCK: int = 2
+
 const CHUNK_SIZE: int = 16
 const TERRAIN_HEIGHT: int = 0
 const VIEW_DISTANCE: int = 16
@@ -16,7 +18,7 @@ var chunks_to_generate: Array[Vector2i] = []
 var chunks_to_unload: Array[Vector2i] = []
 
 func get_block(_x: int, y: int, _z: int) -> int:
-    return DIRT_BLOCK if y == TERRAIN_HEIGHT else AIR_BLOCK
+    return GRASS_BLOCK if y == TERRAIN_HEIGHT else AIR_BLOCK
 
 func generate_chunk(chunk_x: int, chunk_z: int) -> void:
     for x in range(CHUNK_SIZE):
